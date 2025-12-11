@@ -11,43 +11,16 @@ C = C_soln;
 B = B_soln;
 E = E_soln;
 
-% D = 1.0;
-% C = 0.4;
-% B = 1.00;
-% alpha = deg2rad(90);
-% E = 0.5;
-
-% D = 1.79;
-% C = 0.439;
-% B = 0.57;
-% alpha = deg2rad(90);
-% E = 0.57;
-
-
-% alpha = 1.57;
-% D = 0.95;
-% C = 1.18;
-% B = 1.5;
-% E = 1.0;
-
-% Henry
-% alpha = deg2rad(98.35);
-% D = 0.66;
-% C = 0.26;
-% B = 1.44;
-
-
-
 % Center of Mass
 % m = 8000;
-m = 4000;
+m = 4000; % M is 8000 kg but we assume each actuator only needs to take half the load (one actuator on each end of the wall)
 g = 9.8;
 I = 0.9;
 J = 0.6;
 F_g = m*g;
 Phi = atan(I/J);
 
-% --- Data Storage for Final Plots ---
+% --- Set up ---
 theta_vec = 0:1:90; % Vector of theta values in degrees
 F_act_vec = zeros(size(theta_vec));
 F_act_dir_vec = zeros(91, 2);
@@ -55,7 +28,7 @@ T_ext_vec = zeros(size(theta_vec));
 A_vec = zeros(size(theta_vec));
 theta_cyl_vec = zeros(size(theta_vec));
 
-% --- Set up the Figure for Actuation Animation ---
+% --- Set up actuation animation ---
 figure('Name', '4-Bar Linkage Animation', 'NumberTitle', 'off');
 hold on;
 axis equal;
@@ -66,7 +39,6 @@ ylabel('Y Position (m)');
 r_e = [0; 0; 0];
 r_a = E * j_hat;
 r_d = D * i_hat;
-
 
 
 % --- LOOP!! theta 0 to 90 wahoo ---
@@ -80,7 +52,6 @@ for i = 1:length(theta_vec)
     r_cb = r_b - r_c;
     r_ba = r_a - r_b;
     r_db = r_b - r_d;
-    % norm(r_db)
 
     A = norm(r_ba);
     A_vec(i) = A;
@@ -94,8 +65,6 @@ for i = 1:length(theta_vec)
     T_ext_vec(i) = T_ext;
     F_act_dir_vec(i,1) = F_act*u_ba(1);
     F_act_dir_vec(i,2) = F_act*u_ba(2);
-
-    % F_act_dir_vec(i) = u_ba*F_act;
 
     theta_cyl_vec(i) = rad2deg(acos(dot(-r_ba,r_d)/(norm(r_ba)*norm(r_d))));
 
