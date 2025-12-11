@@ -21,18 +21,20 @@ alpha = opti.variable(1,1);
 
 par = opti.parameter(4,1);
 
-opti.subject_to(B > 0.1);
+opti.subject_to(B > 0.2);
 opti.subject_to(C > 0.1);
 opti.subject_to(D > 0.1);
 opti.subject_to(E > 0);
 
-opti.subject_to(C < 1.75);
+opti.subject_to(C < 2.0);
 opti.subject_to(E < 0.5);
 opti.subject_to(B < 1);
 opti.subject_to(D < 1);
+% 
+% opti.subject_to(alpha > 0);
+% opti.subject_to(alpha < pi-0.0001);
 
-opti.subject_to(alpha > 0);
-opti.subject_to(alpha < pi-0.0001);
+opti.subject_to(alpha == pi/2);
 
 opti.subject_to(0.1 < A(1));
 A(1) = A_fn(B, C, D, E, 0, alpha);
@@ -42,7 +44,7 @@ F_act(1) = F_act_fn(B, C, D, E, 0, alpha, par); %/(T_ext_fn(par, 0)+ 1e-9); % us
 
 
 opti.subject_to(r(2,1) >= 0);
-% opti.subject_to(-r(2,4) >= 0);
+opti.subject_to(r(2,5) <= 2.0); % height of point b should be less than 2
 
 for th = 1:90
     th_rad = th * pi/180; % Convert degrees to radians
@@ -56,17 +58,33 @@ for th = 1:90
     F_act(th+1) = F_act_fn(B, C, D, E, th_rad, alpha, par); %/(T_ext_fn(par, th_rad)+ 1e-9);
     
     opti.subject_to(r(2,1) >= 0); % linkage doesn't go through the ground
-    % opti.subject_to(-r(2,4) >= 0); % linkage doesn't go through the ground
 end
 
 
 opti.subject_to(abs(F_act) <= F_max);
 opti.subject_to(A_min <= A);
 opti.subject_to(A <= A_max);
-% opti.subject_to(A_max-A_min <= A_min); % stroke length constraint 
-opti.subject_to(A_max <= tare + 2*(A_max-A_min)); % tare is 0.23
-opti.subject_to(A_min == tare + (A_max-A_min));
+
+% Duff Norton R10160B50: 22.125 (562) + (1.25 x Stroke)
+% opti.subject_to(A_max == 0.562 + 2.25*(A_max-A_min));
+% opti.subject_to(A_min == 0.562 + 1.25*(A_max-A_min));
+% 
+opti.subject_to(A_max == 0.562 + 0.1016*1.25 + 2.25*(A_max-A_min));
+opti.subject_to(A_min == 0.562 + 0.1016*1.25 + 1.25*(A_max-A_min));
+
+% opti.subject_to(A_max == 0.562 + 2.25*(A_max-A_min));
+% opti.subject_to(A_min == 0.562 + 1.25*(A_max-A_min));
+
+
+% Tare constraint formulation: 
+% opti.subject_to(A_max <= tare + 2*(A_max-A_min)); % tare is 0.23
+% opti.subject_to(A_min == tare + (A_max-A_min));
+
+% Original formulation:
 % opti.subject_to(A_max-A_min <= 1.3);
+
+% Original formulation 2: 
+% opti.subject_to(A_max-A_min <= A_min); % stroke length constraint 
 
 % cost = sum(abs(F_act));
 cost = F_max;
@@ -88,6 +106,13 @@ opti.set_initial(C, 2.3871);
 opti.set_initial(D,0.8200);
 opti.set_initial(E, 0.4154);
 opti.set_initial(alpha, 1.5539);
+
+% opti.set_value(par, params);
+% opti.set_initial(B, 0.2956300817);
+% opti.set_initial(C, 1.978107066);
+% opti.set_initial(D,0.377789299653379);
+% opti.set_initial(E, 0.419844446937086);
+% opti.set_initial(alpha, 1.5707963267949);
 
 %% [SOLVE]:
 try

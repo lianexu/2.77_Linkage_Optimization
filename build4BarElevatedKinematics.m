@@ -11,7 +11,7 @@ function [] = build4BarElevatedKinematics()
     I = par(3);
     J = par(4);
 
-    
+    % Set up geometry
     i_hat = [1; 0; 0];
     j_hat = [0; 1; 0];
     % k_hat = cross(i_hat, j_hat);
@@ -22,32 +22,29 @@ function [] = build4BarElevatedKinematics()
     r_d = D * i_hat;
     r_c = r_d + C*(cos(th)*i_hat + sin(th)*j_hat);
     r_b = r_c + B*(-cos(alpha-th)*i_hat + sin(alpha-th)*j_hat);
-
-
     
     r_dc = r_c-r_d;
     r_cb = r_b-r_c; 
     r_ba = r_a-r_b; 
     r_db = r_b-r_d;
-    r = [r_dc, r_cb, r_ba, r_db];
+    r = [r_dc, r_cb, r_ba, r_db, r_b];
 
-    % Beta = acos(dot(r_cb, r_b) / (norm(r_cb)*norm(r_b)));
     A = norm(r_ba);
+       
+    % Calulate external torque from gravity (at the hinge)
+    F_g = m*g;  
+    Phi = atan(I/J); %
+    T_ext = sqrt(I^2+J^2)*F_g*sin(Phi-th); 
     
-    F_g = m*g;
-    Phi = atan(I/J);
-    T_ext = sqrt(I^2+J^2)*F_g*sin(Phi-th);
+    % Obtain direction of force of actuation
+    u_ba = r_ba / (norm(r_ba) + 1e-9); % Unit vector from b to a
 
-    u_ba = r_ba / (norm(r_ba) + 1e-9);
-
-    % 2. Calculate the effective torque arm magnitude using the cross product.
+    % Calculate the effective torque arm magnitude using the cross product.
     torque_arm = norm(cross(r_db, u_ba));
     
-    % 3. Calculate the force magnitude.
+    % Calculate the force magnitude required to balance the torque from gravity.
     % Add epsilon to the denominator to prevent division by zero.
     F_act = T_ext / (torque_arm + 1e-9);
-    
-    % F_act = T_ext / (norm(r_db)*cos(abs(pi/2-Beta)));
 
     r_fn = casadi.Function('r_fn', {B, C, D, E, th, alpha}, {r});
     r_fn.save('codegen/r_fn.casadi');

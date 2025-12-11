@@ -50,6 +50,7 @@ Phi = atan(I/J);
 % --- Data Storage for Final Plots ---
 theta_vec = 0:1:90; % Vector of theta values in degrees
 F_act_vec = zeros(size(theta_vec));
+F_act_dir_vec = zeros(91, 2);
 T_ext_vec = zeros(size(theta_vec));
 A_vec = zeros(size(theta_vec));
 theta_cyl_vec = zeros(size(theta_vec));
@@ -91,6 +92,10 @@ for i = 1:length(theta_vec)
 
     F_act_vec(i) = F_act;
     T_ext_vec(i) = T_ext;
+    F_act_dir_vec(i,1) = F_act*u_ba(1);
+    F_act_dir_vec(i,2) = F_act*u_ba(2);
+
+    % F_act_dir_vec(i) = u_ba*F_act;
 
     theta_cyl_vec(i) = rad2deg(acos(dot(-r_ba,r_d)/(norm(r_ba)*norm(r_d))));
 
